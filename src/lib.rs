@@ -545,6 +545,9 @@ pub enum AuthType {
     RequestBody,
     /// The client_id and client_secret will be included using the basic auth authentication scheme.
     BasicAuth,
+    /// The client_id and client_secret will be included using the basic auth authentication scheme,
+    /// without url encoding
+    BasicAuthNC,
 }
 
 ///
@@ -1947,6 +1950,24 @@ fn endpoint_request<'a>(
                 AUTHORIZATION,
                 HeaderValue::from_str(&format!("Basic {}", &b64_credential)).unwrap(),
             );
+        }
+        AuthType::BasicAuthNC => {
+            // Section 2.3.1 of RFC 6749 requires separately url-encoding the id and secret
+            // before using them as HTTP Basic auth username and password. Note that this is
+            // not standard for ordinary Basic auth, so curl won't do it for us.
+            let urlencoded_id: &str = client_id.as_str();
+
+            if let Some(ref client_secret) = client_secret {
+                let b64_credential = base64::encode(&format!(
+                    "{}:{}",
+                    urlencoded_id,
+                    client_secret.secret()
+                ));
+                headers.append(
+                    AUTHORIZATION,
+                    HeaderValue::from_str(&format!("Basic {}", &b64_credential)).unwrap(),
+                );
+            }
         }
     }
 
