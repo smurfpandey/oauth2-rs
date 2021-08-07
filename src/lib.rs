@@ -25,7 +25,7 @@
 //!
 //!    Example import in `Cargo.toml`:
 //!    ```toml
-//!    oauth2 = "3.0"
+//!    oauth2 = "4.1"
 //!    ```
 //!
 //! For the HTTP client modes described above, the following HTTP client implementations can be
@@ -58,7 +58,7 @@
 //!    may wish to disable the default `reqwest` 0.10 dependency by specifying
 //!    `default-features = false` in `Cargo.toml`:
 //!    ```toml
-//!    oauth2 = { version = "3.0", default-features = false }
+//!    oauth2 = { version = "4.1", default-features = false }
 //!    ```
 //!
 //!    Synchronous HTTP clients should implement the following trait:
@@ -991,6 +991,17 @@ impl<'a> AuthorizationRequest<'a> {
     }
 
     ///
+    /// Appends a collection of scopes to the token request.
+    ///
+    pub fn add_scopes<I>(mut self, scopes: I) -> Self
+    where
+        I: IntoIterator<Item = Scope>,
+    {
+        self.scopes.extend(scopes.into_iter().map(Cow::Owned));
+        self
+    }
+
+    ///
     /// Appends an extra param to the authorization URL.
     ///
     /// This method allows extensions to be used without direct support from
@@ -1318,6 +1329,17 @@ where
     }
 
     ///
+    /// Appends a collection of scopes to the token request.
+    ///
+    pub fn add_scopes<I>(mut self, scopes: I) -> Self
+    where
+        I: IntoIterator<Item = Scope>,
+    {
+        self.scopes.extend(scopes.into_iter().map(Cow::Owned));
+        self
+    }
+
+    ///
     /// Synchronously sends the request to the authorization server and awaits a response.
     ///
     pub fn request<F, RE>(self, http_client: F) -> Result<TR, RequestTokenError<RE, TE>>
@@ -1431,6 +1453,17 @@ where
     }
 
     ///
+    /// Appends a collection of scopes to the token request.
+    ///
+    pub fn add_scopes<I>(mut self, scopes: I) -> Self
+    where
+        I: IntoIterator<Item = Scope>,
+    {
+        self.scopes.extend(scopes.into_iter().map(Cow::Owned));
+        self
+    }
+
+    ///
     /// Synchronously sends the request to the authorization server and awaits a response.
     ///
     pub fn request<F, RE>(self, http_client: F) -> Result<TR, RequestTokenError<RE, TE>>
@@ -1540,6 +1573,17 @@ where
     ///
     pub fn add_scope(mut self, scope: Scope) -> Self {
         self.scopes.push(Cow::Owned(scope));
+        self
+    }
+
+    ///
+    /// Appends a collection of scopes to the token request.
+    ///
+    pub fn add_scopes<I>(mut self, scopes: I) -> Self
+    where
+        I: IntoIterator<Item = Scope>,
+    {
+        self.scopes.extend(scopes.into_iter().map(Cow::Owned));
         self
     }
 
@@ -2079,6 +2123,17 @@ where
         self
     }
 
+    ///
+    /// Appends a collection of scopes to the token request.
+    ///
+    pub fn add_scopes<I>(mut self, scopes: I) -> Self
+    where
+        I: IntoIterator<Item = Scope>,
+    {
+        self.scopes.extend(scopes.into_iter().map(Cow::Owned));
+        self
+    }
+
     fn prepare_request<RE>(self) -> Result<HttpRequest, RequestTokenError<RE, TE>>
     where
         RE: Error + 'static,
@@ -2271,7 +2326,7 @@ where
             }
 
             // Sleep here using the provided sleep function.
-            sleep_fn(interval);
+            sleep_fn(interval).await;
         }
     }
 
